@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方案互评系统 - 12人评分小程序模拟</title>
+    <style>
+        :root {
+            --primary: #4A6CF7;
+            --primary-dark: #3651d5;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg: #f0f2f7;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #e8ecf2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 手机外壳 */
+        .phone-frame {
+            width: 430px;
+            max-width: 100%;
+            height: 920px;
+            max-height: 95vh;
+            background: #1a1a1e;
+            border-radius: 28px;
+            padding: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 2px #2a2a2e;
+            position: relative;
+        }
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        /* 状态栏 */
+        .status-bar {
+            background: #fff;
+            padding: 12px 20px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #333;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .status-bar .time {
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .status-icons {
+            display: flex;
+            gap: 6px;
+            font-size: 11px;
+        }
+        /* 头部 */
+        .app-header {
+            background: #fff;
+            padding: 10px 20px 14px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .app-header h1 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.3px;
+        }
+        .app-header .subtitle {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* 通知横幅 */
+        .notification-banner {
+            background: #FFF7ED;
+            border-bottom: 1px solid #FED7AA;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #C2410C;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .notification-banner:hover {
+            background: #FFF1E0;
+        }
+        .notification-banner .icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .notification-banner .close-banner {
+            margin-left: auto;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #C2410C;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.85;
+            }
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .main-content::-webkit-scrollbar {
+            width: 3px;
+        }
+        .main-content::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+
+        /* 卡片 */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title .emoji {
+            font-size: 20px;
+        }
+        .card-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        /* 标签 */
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .tag-submitting {
+            background: #FEF3C7;
+            color: #B45309;
+        }
+        .tag-scoring {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+        .tag-completed {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        .tag-info {
+            background: #E0E7FF;
+            color: #3730A3;
+        }
+
+        /* 按钮 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border-radius: 22px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(74, 108, 247, 0.3);
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 4px 14px rgba(74, 108, 247, 0.4);
+        }
+        .btn-outline {
+            background: #fff;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-outline:hover {
+            background: #f8faff;
+        }
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 12px;
+            border-radius: 16px;
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-warning {
+            background: var(--warning);
+            color: #fff;
+        }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+        }
+        .btn-ghost:hover {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* 输入框 */
+        .input,
+        .textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            transition: var(--transition);
+            background: #fafbfc;
+            color: var(--text);
+            resize: vertical;
+        }
+        .input:focus,
+        .textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.08);
+            background: #fff;
+        }
+        .textarea {
+            min-height: 80px;
+            line-height: 1.6;
+        }
+
+        /* 表格容器 */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: #fff;
+            margin: 4px 0;
+        }
+        .table-container table {
+            width: 100%;
+            min-width: 750px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .table-container th,
+        .table-container td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .table-container th {
+            background: #f8fafc;
+            font-weight: 700;
+            color: var(--text);
+            font-size: 11px;
+            letter-spacing: 0.3px;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .table-container td {
+            color: #334155;
+        }
+        .table-container .col-name {
+            font-weight: 700;
+            color: var(--text);
+            background: #fafcfd;
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            text-align: left;
+            padding-left: 12px;
+        }
+        .table-container .col-scheme {
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            text-align: left;
+            color: #4A6CF7;
+            font-weight: 500;
+        }
+        .table-container .col-scheme:hover {
+            text-decoration: underline;
+        }
+        .table-container .score-cell {
+            font-weight: 700;
+            font-size: 13px;
+            color: #1e293b;
+        }
+        .table-container .avg-score {
+            font-weight: 700;
+            font-size: 14px;
+            color: #4A6CF7;
+            background: #f8faff;
+        }
+        .table-container tr:hover td {
+            background: #f8fafd;
+        }
+        .table-container tr:hover .col-name {
+            background: #f1f5f9;
+        }
+
+        /* 用户列表 */
+        .user-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .user-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            background: #f1f5f9;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            color: #475569;
+        }
+        .user-chip:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+        .user-chip.active {
+            background: #EFF6FF;
+            border-color: #4A6CF7;
+            color: #4A6CF7;
+            font-weight: 700;
+        }
+        .user-chip .avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4A6CF7, #7C8CF8);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* 评分输入组 */
+        .score-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .score-input {
+            width: 55px;
+            padding: 8px;
+            text-align: center;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            transition: var(--transition);
+        }
+        .score-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+        }
+        .score-range {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .modal {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.25s;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .modal h3 {
+            font-size: 17px;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        .modal .modal-body {
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.7;
+            max-height: 50vh;
+            overflow-y: auto;
+            margin-bottom: 14px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .modal .modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* 进度条 */
+        .progress-bar {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 6px 0;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4A6CF7, #7C8CF8);
+            border-radius: 3px;
+            transition: width 0.4s;
+        }
+
+        /* 统计数字 */
+        .stat-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            flex: 1;
+            min-width: 60px;
+            text-align: center;
+            background: #f8fafc;
+            border-radius: var(--radius-sm);
+            padding: 10px 8px;
+            border: 1px solid var(--border);
+        }
+        .stat-item .stat-num {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .stat-item .stat-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            display: flex;
+            background: #fff;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px 4px 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: 500;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            border: none;
+            background: none;
+            position: relative;
+        }
+        .nav-item .nav-icon {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .nav-item.active {
+            color: #4A6CF7;
+            font-weight: 700;
+        }
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: #4A6CF7;
+            border-radius: 0 0 3px 3px;
+        }
+        .nav-badge {
+            position: absolute;
+            top: 2px;
+            right: 15%;
+            background: #EF4444;
+            color: #fff;
+            font-size: 10px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 22px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 2000;
+            animation: toastIn 0.3s, toastOut 0.3s 1.7s forwards;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+        }
+
+        /* 响应式：大屏时也好看 */
+        @media (min-width: 768px) {
+            .phone-frame {
+                width: 440px;
+                height: 900px;
+            }
+            .table-container table {
+                min-width: 800px;
+            }
+        }
+
+        /* 评分卡片列表 */
+        .scoring-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: #fafcfd;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .scoring-card .target-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 100px;
+        }
+        .scoring-card .target-name {
+            font-weight: 700;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-frame">
+        <div class="phone-screen" id="app">
+            <!-- 状态栏 -->
+            <div class="status-bar">
+                <span class="time" id="statusTime">9:41</span>
+                <span style="font-size:12px;">方案互评系统</span>
+                <span class="status-icons">📶 🔋</span>
+            </div>
+
+            <!-- 头部 -->
+            <div class="app-header">
+                <h1>📋 方案互评系统</h1>
+                <div class="subtitle" id="roundInfo">2026年5月轮次 · 进行中</div>
+            </div>
+
+            <!-- 通知横幅 -->
+            <div class="notification-banner" id="notificationBanner" style="display:none;">
+                <span class="icon">🔔</span>
+                <span id="notificationText">提醒消息</span>
+                <button class="close-banner" onclick="dismissBanner()">✕</button>
+            </div>
+
+            <!-- 主内容 -->
+            <div class="main-content" id="mainContent">
+                <!-- 动态渲染 -->
+            </div>
+
+            <!-- 底部导航 -->
+            <div class="bottom-nav">
+                <button class="nav-item active" data-tab="overview" onclick="switchTab('overview')">
+                    <span class="nav-icon">📊</span>概览
+                </button>
+                <button class="nav-item" data-tab="myplan" onclick="switchTab('myplan')">
+                    <span class="nav-icon">📝</span>方案
+                </button>
+                <button class="nav-item" data-tab="scoring" onclick="switchTab('scoring')" id="navScoring">
+                    <span class="nav-icon">⭐</span>评分
+                    <span class="nav-badge" id="scoringBadge" style="display:none;">0</span>
+                </button>
+                <button class="nav-item" data-tab="result" onclick="switchTab('result')">
+                    <span class="nav-icon">📋</span>结果
+                </button>
+                <button class="nav-item" data-tab="settings" onclick="switchTab('settings')">
+                    <span class="nav-icon">⚙️</span>管理
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗层 -->
+    <div class="modal-overlay" id="modalOverlay" style="display:none;" onclick="closeModal(event)">
+        <div class="modal" id="modalBox" onclick="event.stopPropagation()">
+            <h3 id="modalTitle">标题</h3>
+            <div class="modal-body" id="modalBody">内容</div>
+            <div class="modal-actions" id="modalActions"></div>
+        </div>
+    </div>
+
+    <!-- Toast容器 -->
+    <div id="toastContainer"></div>
+
+    <script>
+        (function() {
+            // ==================== 数据管理 ====================
+            const STORAGE_KEY = 'peer_review_app_data';
+            const USER_NAMES = [
+                '张建国', '李明远', '王思涵', '陈志强', '刘慧敏', '赵文博',
+                '周晓峰', '吴雅琴', '郑伟杰', '钱丽华', '孙浩宇', '杨雪莹'
+            ];
+
+            // 默认数据
+            function createDefaultData() {
+                const users = USER_NAMES.map((name, i) => ({
+                    id: i,
+                    name: name,
+                    avatar: name.charAt(0),
+                }));
+
+                const now = new Date();
+                const currentMonth = now.getFullYear() + '年' + (now.getMonth() + 1) + '月';
+                const roundId = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+                // 设置截止日期为当前日期+3天（提交截止）和+8天（评分截止）
+                const submitDeadline = new Date(now);
+                submitDeadline.setDate(submitDeadline.getDate() + 3);
+                const scoreDeadline = new Date(now);
+                scoreDeadline.setDate(scoreDeadline.getDate() + 8);
+
+                const currentRound = {
+                    id: roundId,
+                    month: currentMonth,
+                    submitDeadline: submitDeadline.toISOString().split('T')[0],
+                    scoreDeadline: scoreDeadline.toISOString().split('T')[0],
+                    status: 'submitting', // 'submitting' | 'scoring' | 'completed'
+                    submissions: {}, // {userId: content}
+                    scoreAssignments: [], // [{scorerId, targetIds:[]}]
+                    scores: {}, // {'scorerId_targetId': score}
+                    createdAt: now.toISOString(),
+                };
+
+                return {
+                    users: users,
+                    currentRound: currentRound,
+                    history: [],
+                    adminSettings: {
+                        submitDays: 7,
+                        scoreDays: 6,
+                        autoAdvance: true,
+                    }
+                };
+            }
+
+            function loadData() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (raw) {
+                        const data = JSON.parse(raw);
+                        // 确保数据结构完整
+                        if (!data.users || !data.currentRound || !data.history) {
+                            return createDefaultData();
+                        }
+                        return data;
+                    }
+                } catch (e) {
+                    console.error('数据加载失败', e);
+                }
+                return createDefaultData();
+            }
+
+            function saveData(data) {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                } catch (e) {
+                    showToast('⚠️ 存储空间不足，请清理旧数据');
+                }
+            }
+
+            let appData = loadData();
+            let currentTab = 'overview';
+            let currentUserId = 0; // 当前模拟登录用户（管理员可切换）
+
+            // ==================== 评分分配算法 ====================
+            function generateScoreAssignments(users, targetsPerPerson = 5) {
+                const n = users.length;
+                if (n < targetsPerPerson + 1) {
+                    // 人数不足，调整为评所有人（除自己）
+                    targetsPerPerson = Math.min(n - 1, targetsPerPerson);
+                }
+                // Fisher-Yates 洗牌
+                const shuffled = users.map(u => u.id);
+                for (let i = n - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                // 循环分配：第i个人评第i+1到i+targetsPerPerson个人
+                const assignments = [];
+                for (let i = 0; i < n; i++) {
+                    const scorerId = shuffled[i];
+                    const targetIds = [];
+                    for (let k = 1; k <= targetsPerPerson; k++) {
+                        targetIds.push(shuffled[(i + k) % n]);
+                    }
+                    assignments.push({ scorerId, targetIds });
+                }
+                // 按scorerId排序以便查找
+                assignments.sort((a, b) => a.scorerId - b.scorerId);
+                return assignments;
+            }
+
+            function getAssignmentForUser(userId, assignments) {
+                return assignments.find(a => a.scorerId === userId) || null;
+            }
+
+            function getScorersForTarget(targetId, assignments) {
+                const scorers = [];
+                assignments.forEach(a => {
+                    if (a.targetIds.includes(targetId)) {
+                        scorers.push(a.scorerId);
+                    }
+                });
+                return scorers;
+            }
+
+            // ==================== 辅助函数 ====================
+            function getUserName(id) {
+                const u = appData.users.find(u => u.id === id);
+                return u ? u.name : '未知用户';
+            }
+
+            function getUserAvatar(id) {
+                const u = appData.users.find(u => u.id === id);
+                return u ? u.avatar : '?';
+            }
+
+            function formatDate(dateStr) {
+                if (!dateStr) return '--';
+                const d = new Date(dateStr);
+                return (d.getMonth() + 1) + '月' + d.getDate() + '日';
+            }
+
+            function getDaysRemaining(dateStr) {
+                if (!dateStr) return 0;
+                const now = new Date();
+                const target = new Date(dateStr);
+                const diff = target.getTime() - now.getTime();
+                return Math.ceil(diff / (1000 * 60 * 60 * 24));
+            }
+
+            function getStatusTag(status) {
+                const map = {
+                    'submitting': '<span class="tag tag-submitting">📝 方案提交中</span>',
+                    'scoring': '<span class="tag tag-scoring">⭐ 评分进行中</span>',
+                    'completed': '<span class="tag tag-completed">✅ 已完成</span>',
+                };
+                return map[status] || status;
+            }
+
+            // ==================== Toast ====================
+            function showToast(msg) {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = msg;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 2100);
+            }
+
+            // ==================== 弹窗 ====================
+            function showModal(title, body, actionsHTML) {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalBody').innerHTML = body;
+                document.getElementById('modalActions').innerHTML = actionsHTML || '';
+                document.getElementById('modalOverlay').style.display = 'flex';
+            }
+
+            function closeModal(e) {
+                if (e && e.target !== document.getElementById('modalOverlay')) return;
+                document.getElementById('modalOverlay').style.display = 'none';
+            }
+            window.closeModal = closeModal;
+
+            // ==================== 通知横幅 ====================
+            function showBanner(msg) {
+                const banner = document.getElementById('notificationBanner');
+                document.getElementById('notificationText').textContent = msg;
+                banner.style.display = 'flex';
+            }
+
+            function dismissBanner() {
+                document.getElementById('notificationBanner').style.display = 'none';
+            }
+            window.dismissBanner = dismissBanner;
+
+            // ==================== 自动检查与提醒 ====================
+            function checkAndNotify() {
+                const round = appData.currentRound;
+                if (!round) return;
+
+                const now = new Date();
+                const submitDeadline = new Date(round.submitDeadline);
+                const scoreDeadline = new Date(round.scoreDeadline);
+                const daysToSubmit = getDaysRemaining(round.submitDeadline);
+                const daysToScore = getDaysRemaining(round.scoreDeadline);
+
+                // 自动推进状态
+                if (round.status === 'submitting' && now >= submitDeadline) {
+                    // 自动进入评分阶段
+                    advanceToScoringStage();
+                    showBanner('🔔 方案提交已截止！系统已自动分配评分任务，请尽快完成评分。');
+                    return;
+                }
+                if (round.status === 'scoring' && now >= scoreDeadline) {
+                    round.status = 'completed';
+                    saveData(appData);
+                    showBanner('📋 本轮评分已完成！可查看结果表格。');
+                    return;
+                }
+
+                // 临近截止提醒
+                if (round.status === 'submitting' && daysToSubmit <= 1 && daysToSubmit >= 0) {
+                    const submitted = Object.keys(round.submissions).length;
+                    const total = appData.users.length;
+                    if (submitted < total) {
+                        showBanner(`⏰ 方案提交即将截止！还有${total - submitted}人未提交（剩余${daysToSubmit}天）`);
+                    }
+                }
+                if (round.status === 'scoring' && daysToScore <= 2 && daysToScore >= 0) {
+                    const totalAssignments = round.scoreAssignments.reduce((sum, a) => sum + a.targetIds.length,
+                    0);
+                    const completedScores = Object.keys(round.scores).length;
+                    if (completedScores < totalAssignments) {
+                        showBanner(
+                            `⏰ 评分即将截止！已完成${completedScores}/${totalAssignments}项评分（剩余${daysToScore}天）`);
+                    }
+                }
+            }
+
+            function advanceToScoringStage() {
+                const round = appData.currentRound;
+                if (round.status !== 'submitting') return;
+                round.status = 'scoring';
+                // 生成评分分配
+                round.scoreAssignments = generateScoreAssignments(appData.users, 5);
+                round.scores = {};
+                saveData(appData);
+                renderAll();
+            }
+
+            // 定时检查（每30秒）
+            setInterval(() => {
+                checkAndNotify();
+                updateStatusTime();
+            }, 30000);
+
+            function updateStatusTime() {
+                const now = new Date();
+                document.getElementById('statusTime').textContent =
+                    String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+            }
+
+            // ==================== 渲染函数 ====================
+            function renderAll() {
+                updateRoundInfo();
+                updateNavBadges();
+                switch (currentTab) {
+                    case 'overview':
+                        renderOverview();
+                        break;
+                    case 'myplan':
+                        renderMyPlan();
+                        break;
+                    case 'scoring':
+                        renderScoring();
+                        break;
+                    case 'result':
+                        renderResult();
+                        break;
+                    case 'settings':
+                        renderSettings();
+                        break;
+                }
+                updateActiveNav();
+            }
+
+            function updateRoundInfo() {
+                const round = appData.currentRound;
+                document.getElementById('roundInfo').textContent =
+                    `${round.month}轮次 · ${round.status === 'submitting' ? '方案提交中' : round.status === 'scoring' ? '评分进行中' : '已完成'}`;
+            }
+
+            function updateNavBadges() {
+                const round = appData.currentRound;
+                const badge = document.getElementById('scoringBadge');
+                if (round.status === 'scoring') {
+                    const myAssignment = getAssignmentForUser(currentUserId, round.scoreAssignments);
+                    if (myAssignment) {
+                        const completed = myAssignment.targetIds.filter(tid =>
+                            round.scores[`${currentUserId}_${tid}`] !== undefined
+                        ).length;
+                        const remaining = myAssignment.targetIds.length - completed;
+                        if (remaining > 0) {
+                            badge.style.display = 'flex';
+                            badge.textContent = remaining;
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+
+            function updateActiveNav() {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.tab === currentTab);
+                });
+            }
+
+            // ==================== Tab: 概览 ====================
+            function renderOverview() {
+                const round = appData.currentRound;
+                const totalUsers = appData.users.length;
+                const submittedCount = Object.keys(round.submissions).length;
+                const totalScoreAssignments = round.scoreAssignments.reduce((sum, a) => sum + a.targetIds.length, 0);
+                const completedScores = Object.keys(round.scores).length;
+                const daysToSubmit = getDaysRemaining(round.submitDeadline);
+                const daysToScore = getDaysRemaining(round.scoreDeadline);
+
+                let html = '';
+                // 状态卡片
+                html += `
+                <div class="card">
+                    <div class="card-title"><span class="emoji">📅</span>当前轮次状态</div>
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                        ${getStatusTag(round.status)}
+                        <span style="font-size:13px;color:#64748b;">${round.month}</span>
+                    </div>
+                    <div style="margin-top:10px;font-size:13px;color:#475569;">
+                        📝 方案提交截止：<b>${formatDate(round.submitDeadline)}</b> 
+                        ${round.status==='submitting' ? (daysToSubmit>=0 ? `（剩余<strong style="color:#EF4444;">${daysToSubmit}</strong>天）` : '（已截止）') : ''}
+                        <br>
+                        ⭐ 评分截止：<b>${formatDate(round.scoreDeadline)}</b>
+                        ${round.status==='scoring' ? (daysToScore>=0 ? `（剩余<strong style="color:#EF4444;">${daysToScore}</strong>天）` : '（已截止）') : ''}
+                    </div>
+                </div>`;
+
+                // 统计数字
+                html += `
+                <div class="card">
+                    <div class="card-title"><span class="emoji">📊</span>数据统计</div>
+                    <div class="stat-row">
+                        <div class="stat-item">
+                            <div class="stat-num">${totalUsers}</div>
+                            <div class="stat-label">总人数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-num">${submittedCount}</div>
+                            <div class="stat-label">已提交方案</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-num">${completedScores}</div>
+                            <div class="stat-label">已完成评分</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-num">${totalScoreAssignments}</div>
+                            <div class="stat-label">总评分任务</div>
+                        </div>
+                    </div>
+                    ${round.status==='submitting' ? `
+                    <div style="margin-top:10px;">
+                        <span style="font-size:11px;color:#64748b;">方案提交进度 ${submittedCount}/${totalUsers}</span>
+                        <div class="progress-bar"><div class="fill" style="width:${(submittedCount/totalUsers)*100}%;"></div></div>
+                    </div>` : round.status==='scoring' ? `
+                    <div style="margin-top:10px;">
+                        <span style="font-size:11px;color:#64748b;">评分进度 ${completedScores}/${totalScoreAssignments}</span>
+                        <div class="progress-bar"><div class="fill" style="width:${totalScoreAssignments>0?(completedScores/totalScoreAssignments)*100:0}%;"></div></div>
+                    </div>` : ''}
+                </div>`;
+
+                // 当前用户身份切换
+                html += `
+                <div class="card">
+                    <div class="card-title"><span class="emoji">👤</span>当前模拟用户</div>
+                    <div class="user-list">
+                        ${appData.users.map(u => `
+                            <div class="user-chip ${u.id === currentUserId ? 'active' : ''}" 
+                                 onclick="switchUser(${u.id})" title="点击切换用户">
+                                <span class="avatar">${u.avatar}</span>${u.name}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:6px;">💡 点击切换模拟用户身份</div>
+                </div>`;
+
+                // 快速操作
+                html += `
+                <div class="card">
+                    <div class="card-title"><span class="emoji">⚡</span>快速操作</div>
+                    <div class="btn-row">
+                        ${round.status==='submitting' ? `
+                            <button class="btn btn-primary btn-sm" onclick="switchTab('myplan')">📝 提交方案</button>
+                            <button class="btn btn-warning btn-sm" onclick="forceAdvanceStage()">⏩ 模拟截止</button>
+                        ` : round.status==='scoring' ? `
+                            <button class="btn btn-primary btn-sm" onclick="switchTab('scoring')">⭐ 去评分</button>
+                            <button class="btn btn-warning btn-sm" onclick="forceAdvanceStage()">⏩ 模拟截止</button>
+                        ` : `
+                            <button class="btn btn-primary btn-sm" onclick="switchTab('result')">📋 查看结果</button>
+                            <button class="btn btn-outline btn-sm" onclick="createNewRound()">🆕 创建新一轮</button>
+                        `}
+                        <button class="btn btn-ghost btn-sm" onclick="resetAllData()">🔄 重置数据</button>
+                    </div>
+                </div>`;
+
+                document.getElementById('mainContent').innerHTML = html;
+            }
+
+            // ==================== Tab: 方案提交 ====================
+            function renderMyPlan() {
+                const round = appData.currentRound;
+                const mySubmission = round.submissions[currentUserId] || '';
+                const canSubmit = round.status === 'submitting';
+                const submitted = mySubmission.trim().length > 0;
+
+                let html = `
+                <div class="card">
+                    <div class="card-title"><span class="emoji">📝</span>我的方案</div>
+                    <div class="card-subtitle">当前用户：<b>${getUserName(currentUserId)}</b> | ${round.month}</div>
+                    ${!canSubmit ? `<p style="color:#EF4444;font-size:13px;">⚠️ 当前不在方案提交阶段（状态：${round.status}）</p>` : ''}
+                    ${submitted && canSubmit ? `<p style="color:#10B981;font-size:13px;">✅ 方案已提交（提交截止：${formatDate(round.submitDeadline)}）</p>` : ''}
+                    <textarea class="textarea" id="schemeInput" 
+                              placeholder="请输入您的方案内容..." 
+                              ${!canSubmit ? 'disabled' : ''}
+                              style="margin-top:8px;">${mySubmission}</textarea>
+                    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="btn btn-primary btn-sm" onclick="submitScheme()" ${!canSubmit ? 'disabled' : ''}>
+                            ${submitted ? '📝 更新方案' : '✅ 提交方案'}
+                        </button>
+                        ${submitted ? `<button class="btn btn-outline btn-sm" onclick="viewMyScheme()">👁️ 预览</button>` : ''}
+                    </div>
+                </div>`;
+
+                // 查看所有人的提交状态（概览）
+                html += `
+                <div class="card">
+                    <div class="card-title"><span class="emoji">📋</span>方案提交状态</div>
+                    <div style="font-size:12px;color:#64748b;margin-bottom:8px;">共${appData.users.length}人</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        ${appData.users.map(u => {
+                            const hasSubmitted = (round.submissions[u.id] || '').trim().length > 0;
+                            return `<span style="padding:5px 10px;border-radius:16px;font-size:11px;font-weight:600;
+                                background:${hasSubmitted ? '#D1FAE5' : '#FEF2F2'};
+                                color:${hasSubmitted ? '#065F46' : '#991B1B'};
+                                border:1px solid ${hasSubmitted ? '#A7F3D0' : '#FECACA'};">
+                                ${u.name} ${hasSubmitted ? '✓' : '✗'}
+                            </span>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+
+                document.getElementById('mainContent').innerHTML = html;
+            }
+
+            function submitScheme() {
+                const input = document.getElementById('schemeInput');
+                const content = input.value.trim();
+                if (!content) {
+                    showToast('⚠️ 请输入方案内容');
+                    return;
+                }
+                appData.currentRound.submissions[currentUserId] = content;
+                saveData(appData);
+                showToast('✅ 方案提交成功！');
+                renderAll();
+            }
+
+            function viewMyScheme() {
+                const content = appData.currentRound.submissions[currentUserId] || '(空)';
+                showModal('📝 我的方案', `<div style="white-space:pre-wrap;line-height:1.8;">${content}</div>`,
+                    '<button class="btn btn-primary btn-sm" onclick="closeModal()">关闭</button>');
+            }
+
+            // ==================== Tab: 评分 ====================
+            function renderScoring() {
+                const round = appData.currentRound;
+                const myAssignment = getAssignmentForUser(currentUserId, round.scoreAssignments);
+
+                let html = '';
+                if (round.status === 'submitting') {
+                    html += `
+                    <div class="card">
+                        <div class="card-title"><span class="emoji">⭐</span>评分任务</div>
+                        <p style="color:#F59E0B;font-size:14px;">⏳ 评分尚未开始，请等待方案提交截止后系统自动分配评分任务。</p>
+                        <p style="font-size:12px;color:#64748b;">提交截止：${formatDate(round.submitDeadline)}</p>
+                    </div>`;
+                } else if (round.status === 'scoring' && myAssignment) {
+                    const targets = myAssignment.targetIds;
+                    html += `
+                    <div class="card">
+                        <div class="card-title"><span class="emoji">⭐</span>我的评分任务</div>
+                        <div class="card-subtitle">作为 <b>${getUserName(currentUserId)}</b>，你需要给以下 <b>${targets.length}</b> 人评分</div>
+                        <p style="font-size:12px;color:#EF4444;">⏰ 评分截止：${formatDate(round.scoreDeadline)}（剩余${Math.max(0,getDaysRemaining(round.scoreDeadline))}天）</p>
+                    </div>`;
+
+                    targets.forEach(tid => {
+                        const targetScheme = round.submissions[tid] || '(该用户尚未提交方案)';
+                        const existingScore = round.scores[`${currentUserId}_${tid}`];
+                        const scored = existingScore !== undefined;
+                        html += `
+                        <div class="card scoring-card" style="border-left:3px solid ${scored ? '#10B981' : '#F59E0B'};">
+                            <div class="target-info">
+                                <span class="avatar" style="width:32px;height:32px;font-size:13px;">${getUserAvatar(tid)}</span>
+                                <div>
+                                    <div class="target-name">${getUserName(tid)}</div>
+                                    <button class="btn btn-ghost btn-sm" onclick="viewTargetScheme(${tid})" style="font-size:10px;padding:2px 8px;">
+                                        📄 查看方案
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="score-input-group">
+                                <input type="number" class="score-input" id="scoreInput_${tid}" 
+                                       min="1" max="10" value="${existingScore || ''}" 
+                                       placeholder="1-10" ${scored ? 'style="border-color:#10B981;background:#f0fdf4;"' : ''}>
+                                <span class="score-range">/10</span>
+                                <button class="btn btn-sm ${scored ? 'btn-outline' : 'btn-primary'}" 
+                                        onclick="submitScore(${tid})" style="min-width:50px;">
+                                    ${scored ? '更新' : '提交'}
+                                </button>
+                            </div>
+                        </div>`;
+                    });
+
+                    const allScored = targets.every(tid => round.scores[`${currentUserId}_${tid}`] !== undefined);
+                    if (allScored) {
+                        html += `
+                        <div class="card" style="background:#f0fdf4;border:2px solid #10B981;">
+                            <p style="color:#065F46;font-weight:700;text-align:center;">🎉 你已完成所有评分任务！</p>
+                        </div>`;
+                    }
+                } else if (round.status === 'completed') {
+                    html += `
+                    <div class="card">
+                        <div class="card-title"><span class="emoji">⭐</span>评分任务</div>
+                        <p style="color:#10B981;font-size:14px;">✅ 本轮评分已完成，请查看结果。</p>
+                    </div>`;
+                } else {
+                    html += `
+                    <div class="card">
+                        <p style="color:#64748b;">暂无评分任务分配。</p>
+                    </div>`;
+                }
+
+                document.getElementById('mainContent').innerHTML = html;
+            }
+
+            function viewTargetScheme(tid) {
+                const content = appData.currentRound.submissions[tid] || '(该用户未提交方案)';
+                showModal(`📄 ${getUserName(tid)} 的方案`,
+                    `<div style="white-space:pre-wrap;line-height:1.8;background:#f8fafc;padding:12px;border-radius:8px;">${content}</div>`,
+                    '<button class="btn btn-primary btn-sm" onclick="closeModal()">关闭</button>');
+            }
+
+            function submitScore(targetId) {
+                const input = document.getElementById('scoreInput_' + targetId);
+                const score = parseInt(input.value);
+                if (isNaN(score) || score < 1 || score > 10) {
+                    showToast('⚠️ 请输入1-10之间的分数');
+                    input.focus();
+                    return;
+                }
+                const key = `${currentUserId}_${targetId}`;
+                appData.currentRound.scores[key] = score;
+                saveData(appData);
+                showToast('✅ 评分提交成功！');
+                renderAll();
+            }
+
+            // ==================== Tab: 结果表格 ====================
+            function renderResult() {
+                const round = appData.currentRound;
+                const users = appData.users;
+                const assignments = round.scoreAssignments;
+
+                if (round.status === 'submitting') {
+                    document.getElementById('mainContent').innerHTML = `
+                    <div class="card">
+                        <div class="card-title"><span class="emoji">📋</span>评分结果</div>
+                        <p style="color:#F59E0B;">⏳ 评分尚未开始，请等待方案提交截止。</p>
+                        <p style="font-size:12px;color:#64748b;">提交截止：${formatDate(round.submitDeadline)}</p>
+                    </div>`;
+                    return;
+                }
+
+                // 构建表格数据
+                const tableRows = users.map(user => {
+                    const submission = round.submissions[user.id] || '(未提交)';
+                    const scorers = getScorersForTarget(user.id, assignments);
+                    const scoreDetails = scorers.map(sid => {
+                        const key = `${sid}_${user.id}`;
+                        const score = round.scores[key];
+                        return {
+                            scorerId: sid,
+                            scorerName: getUserName(sid),
+                            score: score !== undefined ? score : '-',
+                        };
+                    });
+                    // 计算平均分
+                    const validScores = scoreDetails.filter(s => typeof s.score === 'number');
+                    const avgScore = validScores.length > 0 ?
+                        (validScores.reduce((sum, s) => sum + s.score, 0) / validScores.length).toFixed(1) :
+                        '-';
+                    return {
+                        userId: user.id,
+                        userName: user.name,
+                        submission,
+                        scoreDetails,
+                        avgScore,
+                        scorerCount: scorers.length,
+                        scoredCount: validScores.length,
+                    };
+                });
+
+                let html = `
+                <div class="card">
+                    <div class="card-title"><span class="emoji">📋</span>评分结果汇总表</div>
+                    <div class="card-subtitle">${round.month} | 状态：${round.status} | 每人被${tableRows[0]?.scorerCount || 5}人评分</div>
+                    <p style="font-size:11px;color:#94a3b8;margin-bottom:8px;">💡 表格可左右滑动查看完整信息 | 点击方案可查看详情</p>
+                </div>
+                <div class="table-container card" style="padding:0;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="col-name">姓名</th>
+                                <th>方案内容</th>
+                                ${tableRows[0]?.scoreDetails.map((_, i) => `<th>评分人${i+1}</th><th>分数${i+1}</th>`).join('') || '<th>评分人1</th><th>分数1</th>'}
+                                <th>平均分</th>
+                                <th>已评/应评</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows.map(row => `
+                                <tr>
+                                    <td class="col-name">${row.userName}</td>
+                                    <td class="col-scheme" onclick="viewUserScheme(${row.userId})" title="点击查看完整方案">
+                                        ${row.submission.length > 15 ? row.submission.substring(0,15)+'...' : row.submission}
+                                    </td>
+                                    ${row.scoreDetails.map(sd => `
+                                        <td style="font-size:11px;color:#475569;">${sd.scorerName}</td>
+                                        <td class="score-cell" style="color:${typeof sd.score==='number' ? '#1e293b' : '#94a3b8'};">
+                                            ${sd.score}
+                                        </td>
+                                    `).join('')}
+                                    <td class="avg-score">${row.avgScore}</td>
+                                    <td style="font-size:12px;color:#64748b;">${row.scoredCount}/${row.scorerCount}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
+
+                // 如果评分完成，显示简要总结
+                if (round.status === 'completed') {
+                    const allAvgs = tableRows.filter(r => typeof r.avgScore === 'number').map(r => parseFloat(r
+                        .avgScore));
+                    if (allAvgs.length > 0) {
+                        const maxAvg = Math.max(...allAvgs);
+                        const minAvg = Math.min(...allAvgs);
+                        const topUsers = tableRows.filter(r => parseFloat(r.avgScore) === maxAvg);
+                        html += `
+                        <div class="card" style="background:#FFFDE7;border:1px solid #FDE68A;">
+                            <div class="card-title"><span class="emoji">🏆</span>本轮亮点</div>
+                            <p style="font-size:13px;">最高平均分：<b>${maxAvg.toFixed(1)}分</b> — ${topUsers.map(u=>u.userName).join('、')}</p>
+                            <p style="font-size:13px;">最低平均分：<b>${minAvg.toFixed(1)}分</b></p>
+                            <p style="font-size:11px;color:#94a3b8;">共${allAvgs.length}人获得有效评分</p>
+                        </div>`;
+                    }
+                }
+
+                document.getElementById('mainContent').innerHTML = html;
+            }
+
+            function viewUserScheme(uid) {
+                const content = appData.currentRound.submissions[uid] || '(未提交方案)';
+                showModal(`📄 ${getUserName(uid)} 的方案`,
+                    `<div style="white-space:pre-wrap;line-height:1.8;background:#f8fafc;padding:12px;border-radius:8px;">${content}</div>`,
+                    '<button class="btn btn-primary btn-sm" onclick="closeModal()">关闭</button>');
+            }
+
+            // ==================== Tab: 管理设置 ====================
+            function renderSettings() {
+                const round = appData.currentRound;
+                const settings = appData.adminSettings;
+                let html = `
+                <div class="card">
+                    <div class="card-title"><span class="emoji">⚙️</span>轮次管理</div>
+                    <div style="font-size:13px;color:#475569;line-height:1.8;">
+                        <b>当前轮次：</b>${round.month}（ID: ${round.id}）<br>
+                        <b>状态：</b>${getStatusTag(round.status)}<br>
+                        <b>方案提交截止：</b>${formatDate(round.submitDeadline)}<br>
+                        <b>评分截止：</b>${formatDate(round.scoreDeadline)}<br>
+                        <b>评分分配人数：</b>每人评5人 / 每人被5人评
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title"><span class="emoji">🛠️</span>管理操作</div>
+                    <div class="btn-row" style="flex-direction:column;gap:8px;">
+                        ${round.status === 'submitting' ? `
+                            <button class="btn btn-warning btn-sm" onclick="forceAdvanceStage()">
+                                ⏩ 手动推进到评分阶段（生成评分分配）
+                            </button>
+                        ` : round.status === 'scoring' ? `
+                            <button class="btn btn-warning btn-sm" onclick="forceCompleteRound()">
+                                ⏩ 手动完成本轮评分
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="regenerateAssignments()">
+                                🔄 重新随机分配评分关系
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-outline btn-sm" onclick="createNewRound()">
+                            🆕 创建新一轮（${getNextMonthLabel()}）
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="resetAllData()">
+                            🔄 完全重置数据
+                        </button>
+                        <button class="btn btn-ghost btn-sm" onclick="exportData()">
+                            📥 导出数据JSON
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title"><span class="emoji">👥</span>人员列表（${appData.users.length}人）</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:5px;">
+                        ${appData.users.map(u => `
+                            <span style="padding:4px 10px;background:#f1f5f9;border-radius:14px;font-size:11px;">
+                                ${u.name}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title"><span class="emoji">📋</span>评分分配详情</div>
+                    ${round.scoreAssignments.length > 0 ? `
+                        <div style="max-height:300px;overflow-y:auto;font-size:12px;line-height:1.8;">
+                            ${round.scoreAssignments.map(a => `
+                                <div style="padding:4px 0;border-bottom:1px solid #f1f5f9;">
+                                    <b>${getUserName(a.scorerId)}</b> 评 → 
+                                    ${a.targetIds.map(tid => getUserName(tid)).join('、')}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `<p style="color:#94a3b8;font-size:13px;">评分分配尚未生成</p>`}
+                </div>`;
+
+                document.getElementById('mainContent').innerHTML = html;
+            }
+
+            function getNextMonthLabel() {
+                const now = new Date();
+                const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+                return nextMonth.getFullYear() + '年' + (nextMonth.getMonth() + 1) + '月';
+            }
+
+            // ==================== 操作函数 ====================
+            function forceAdvanceStage() {
+                const round = appData.currentRound;
+                if (round.status === 'submitting') {
+                    if (Object.keys(round.submissions).length === 0) {
+                        if (!confirm('当前无人提交方案，确定要推进到评分阶段吗？')) return;
+                    }
+                    advanceToScoringStage();
+                    showToast('✅ 已推进到评分阶段，评分分配已生成');
+                } else if (round.status === 'scoring') {
+                    forceCompleteRound();
+                }
+                renderAll();
+            }
+
+            function forceCompleteRound() {
+                if (!confirm('确定手动完成本轮评分吗？未完成的评分将保持空白。')) return;
+                appData.currentRound.status = 'completed';
+                // 归档当前轮次
+                appData.history.push(JSON.parse(JSON.stringify(appData.currentRound)));
+                saveData(appData);
+                showToast('✅ 本轮评分已标记为完成');
+                renderAll();
+            }
+
+            function regenerateAssignments() {
+                if (!confirm('确定重新随机分配评分关系吗？已有的评分记录将被清除。')) return;
+                appData.currentRound.scoreAssignments = generateScoreAssignments(appData.users, 5);
+                appData.currentRound.scores = {};
+                saveData(appData);
+                showToast('✅ 评分关系已重新随机分配');
+                renderAll();
+            }
+
+            function createNewRound() {
+                if (!confirm('确定创建新一轮吗？当前轮次将归档到历史记录。')) return;
+                // 归档当前轮次
+                if (appData.currentRound.status !== 'submitting' || Object.keys(appData.currentRound.submissions)
+                    .length > 0) {
+                    appData.history.push(JSON.parse(JSON.stringify(appData.currentRound)));
+                }
+                // 创建新一轮
+                const now = new Date();
+                const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+                const roundId = nextMonth.getFullYear() + '-' + String(nextMonth.getMonth() + 1).padStart(2, '0');
+                const submitDeadline = new Date(nextMonth);
+                submitDeadline.setDate(submitDeadline.getDate() + 6);
+                const scoreDeadline = new Date(submitDeadline);
+                scoreDeadline.setDate(scoreDeadline.getDate() + 6);
+
+                appData.currentRound = {
+                    id: roundId,
+                    month: nextMonth.getFullYear() + '年' + (nextMonth.getMonth() + 1) + '月',
+                    submitDeadline: submitDeadline.toISOString().split('T')[0],
+                    scoreDeadline: scoreDeadline.toISOString().split('T')[0],
+                    status: 'submitting',
+                    submissions: {},
+                    scoreAssignments: [],
+                    scores: {},
+                    createdAt: now.toISOString(),
+                };
+                saveData(appData);
+                showToast('🆕 新一轮已创建：' + appData.currentRound.month);
+                switchTab('overview');
+            }
+
+            function resetAllData() {
+                if (!confirm('⚠️ 确定完全重置所有数据吗？此操作不可恢复！')) return;
+                if (!confirm('再次确认：所有数据（包括历史记录）将被清除。确定吗？')) return;
+                appData = createDefaultData();
+                saveData(appData);
+                currentUserId = 0;
+                currentTab = 'overview';
+                showToast('✅ 数据已完全重置');
+                renderAll();
+            }
+
+            function exportData() {
+                const dataStr = JSON.stringify(appData, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `方案互评数据_${appData.currentRound.id}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('📥 数据已导出');
+            }
+
+            // ==================== 导航切换 ====================
+            function switchTab(tab) {
+                currentTab = tab;
+                renderAll();
+                // 滚动到顶部
+                document.getElementById('mainContent').scrollTop = 0;
+            }
+
+            function switchUser(uid) {
+                currentUserId = uid;
+                showToast('👤 已切换为：' + getUserName(uid));
+                renderAll();
+            }
+
+            // ==================== 全局暴露 ====================
+            window.switchTab = switchTab;
+            window.switchUser = switchUser;
+            window.submitScheme = submitScheme;
+            window.viewMyScheme = viewMyScheme;
+            window.viewTargetScheme = viewTargetScheme;
+            window.submitScore = submitScore;
+            window.viewUserScheme = viewUserScheme;
+            window.forceAdvanceStage = forceAdvanceStage;
+            window.forceCompleteRound = forceCompleteRound;
+            window.regenerateAssignments = regenerateAssignments;
+            window.createNewRound = createNewRound;
+            window.resetAllData = resetAllData;
+            window.exportData = exportData;
+            window.closeModal = closeModal;
+            window.dismissBanner = dismissBanner;
+
+            // ==================== 初始化 ====================
+            function init() {
+                updateStatusTime();
+                // 更新状态时间每秒刷新
+                setInterval(updateStatusTime, 30000);
+                // 检查是否需要自动推进
+                checkAndNotify();
+                // 初始渲染
+                renderAll();
+                // 请求通知权限（浏览器环境）
+                if ('Notification' in window && Notification.permission === 'default') {
+                    setTimeout(() => {
+                        Notification.requestPermission().catch(() => {});
+                    }, 3000);
+                }
+                console.log('📋 方案互评系统已就绪');
+                console.log('   - 12人互评，每人评5人，每人被5人评');
+                console.log('   - 评分关系每月随机生成');
+                console.log('   - 数据存储在localStorage');
+                console.log('   - 当前轮次：' + appData.currentRound.month);
+                console.log('   - 状态：' + appData.currentRound.status);
+                console.log('   👆 点击底部导航切换页面');
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
